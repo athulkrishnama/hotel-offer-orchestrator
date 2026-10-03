@@ -1,0 +1,332 @@
+{
+  "info": {
+    "name": "Hotel Offer Orchestrator",
+    "description": "API collection for the Hotel Offer Orchestrator service.\n\nSupplier APIs intentionally have a configurable failure rate. If a supplier request fails, Temporal retries the activity automatically. Set SUPPLIER_FAILURE_RATE=0 for deterministic testing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Hotel API",
+      "item": [
+        {
+          "name": "Get Delhi Hotels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/hotels?city=delhi",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "hotels"],
+              "query": [
+                {
+                  "key": "city",
+                  "value": "delhi"
+                }
+              ]
+            },
+            "description": "Fetches all deduplicated hotel offers for Delhi. Overlapping hotels show the cheapest offer."
+          },
+          "response": [
+            {
+              "name": "200 - Deduplicated Hotels",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/hotels?city=delhi",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "hotels"],
+                  "query": [{ "key": "city", "value": "delhi" }]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "[\n  {\n    \"name\": \"Holtin\",\n    \"price\": 5340,\n    \"supplier\": \"Supplier B\",\n    \"commissionPct\": 20\n  },\n  {\n    \"name\": \"Radison\",\n    \"price\": 5900,\n    \"supplier\": \"Supplier A\",\n    \"commissionPct\": 13\n  },\n  {\n    \"name\": \"Taj Palace\",\n    \"price\": 8500,\n    \"supplier\": \"Supplier A\",\n    \"commissionPct\": 15\n  },\n  {\n    \"name\": \"Le Meridian\",\n    \"price\": 7200,\n    \"supplier\": \"Supplier B\",\n    \"commissionPct\": 18\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Filter Hotels by Price",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/hotels?city=delhi&minPrice=5000&maxPrice=7000",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "hotels"],
+              "query": [
+                { "key": "city", "value": "delhi" },
+                { "key": "minPrice", "value": "5000" },
+                { "key": "maxPrice", "value": "7000" }
+              ]
+            },
+            "description": "Fetches hotel offers filtered by price range. Filtering is performed inside Redis using Sorted Set score ranges."
+          },
+          "response": [
+            {
+              "name": "200 - Price Filtered",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/hotels?city=delhi&minPrice=5000&maxPrice=7000",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "hotels"],
+                  "query": [
+                    { "key": "city", "value": "delhi" },
+                    { "key": "minPrice", "value": "5000" },
+                    { "key": "maxPrice", "value": "7000" }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "[\n  {\n    \"name\": \"Holtin\",\n    \"price\": 5340,\n    \"supplier\": \"Supplier B\",\n    \"commissionPct\": 20\n  },\n  {\n    \"name\": \"Radison\",\n    \"price\": 5900,\n    \"supplier\": \"Supplier A\",\n    \"commissionPct\": 13\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Unknown City",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/hotels?city=unknown",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "hotels"],
+              "query": [
+                { "key": "city", "value": "unknown" }
+              ]
+            },
+            "description": "Requests hotels for a city with no data. Should return an empty array."
+          },
+          "response": [
+            {
+              "name": "200 - Empty Result",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/hotels?city=unknown",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "hotels"],
+                  "query": [{ "key": "city", "value": "unknown" }]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "[]"
+            }
+          ]
+        },
+        {
+          "name": "Missing City (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/hotels",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "hotels"]
+            },
+            "description": "Missing required 'city' parameter. Should return 400."
+          },
+          "response": [
+            {
+              "name": "400 - City Required",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/hotels",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "hotels"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"message\": \"city is required\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Supplier APIs",
+      "item": [
+        {
+          "name": "Supplier A Hotels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/supplierA/hotels?city=delhi",
+              "host": ["{{baseUrl}}"],
+              "path": ["supplierA", "hotels"],
+              "query": [
+                { "key": "city", "value": "delhi" }
+              ]
+            },
+            "description": "Direct call to mock Supplier A. May randomly return 503 or delay."
+          },
+          "response": [
+            {
+              "name": "200 - Supplier A Hotels",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/supplierA/hotels?city=delhi",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["supplierA", "hotels"],
+                  "query": [{ "key": "city", "value": "delhi" }]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "[\n  {\n    \"hotelId\": \"a1\",\n    \"name\": \"Holtin\",\n    \"price\": 6000,\n    \"city\": \"delhi\",\n    \"commissionPct\": 10\n  },\n  {\n    \"hotelId\": \"a2\",\n    \"name\": \"Radison\",\n    \"price\": 5900,\n    \"city\": \"delhi\",\n    \"commissionPct\": 13\n  },\n  {\n    \"hotelId\": \"a3\",\n    \"name\": \"Taj Palace\",\n    \"price\": 8500,\n    \"city\": \"delhi\",\n    \"commissionPct\": 15\n  }\n]"
+            },
+            {
+              "name": "503 - Supplier Unavailable",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/supplierA/hotels?city=delhi",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["supplierA", "hotels"],
+                  "query": [{ "key": "city", "value": "delhi" }]
+                }
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"message\": \"Supplier A unavailable\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Supplier B Hotels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/supplierB/hotels?city=delhi",
+              "host": ["{{baseUrl}}"],
+              "path": ["supplierB", "hotels"],
+              "query": [
+                { "key": "city", "value": "delhi" }
+              ]
+            },
+            "description": "Direct call to mock Supplier B. May randomly return 503 or delay."
+          },
+          "response": [
+            {
+              "name": "200 - Supplier B Hotels",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/supplierB/hotels?city=delhi",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["supplierB", "hotels"],
+                  "query": [{ "key": "city", "value": "delhi" }]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "[\n  {\n    \"hotelId\": \"b1\",\n    \"name\": \"Holtin\",\n    \"price\": 5340,\n    \"city\": \"delhi\",\n    \"commissionPct\": 20\n  },\n  {\n    \"hotelId\": \"b2\",\n    \"name\": \"Radison\",\n    \"price\": 6200,\n    \"city\": \"delhi\",\n    \"commissionPct\": 11\n  },\n  {\n    \"hotelId\": \"b3\",\n    \"name\": \"Le Meridian\",\n    \"price\": 7200,\n    \"city\": \"delhi\",\n    \"commissionPct\": 18\n  }\n]"
+            },
+            {
+              "name": "503 - Supplier Unavailable",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/supplierB/hotels?city=delhi",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["supplierB", "hotels"],
+                  "query": [{ "key": "city", "value": "delhi" }]
+                }
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"message\": \"Supplier B unavailable\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Returns the latest health status of both suppliers. Status is read from Redis (not live-pinged)."
+          },
+          "response": [
+            {
+              "name": "200 - Healthy",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["health"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status\": \"healthy\",\n  \"suppliers\": {\n    \"supplierA\": {\n      \"status\": \"healthy\",\n      \"responseTimeMs\": 340,\n      \"lastChecked\": \"2026-10-02T10:00:00.000Z\"\n    },\n    \"supplierB\": {\n      \"status\": \"healthy\",\n      \"responseTimeMs\": 520,\n      \"lastChecked\": \"2026-10-02T10:00:00.000Z\"\n    }\n  }\n}"
+            },
+            {
+              "name": "200 - Degraded",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["health"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status\": \"degraded\",\n  \"suppliers\": {\n    \"supplierA\": {\n      \"status\": \"healthy\",\n      \"responseTimeMs\": 340,\n      \"lastChecked\": \"2026-10-02T10:00:00.000Z\"\n    },\n    \"supplierB\": {\n      \"status\": \"unhealthy\",\n      \"responseTimeMs\": 3010,\n      \"lastChecked\": \"2026-10-02T10:00:00.000Z\",\n      \"error\": \"HTTP 503\"\n    }\n  }\n}"
+            },
+            {
+              "name": "200 - Starting",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["health"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status\": \"starting\",\n  \"suppliers\": {\n    \"supplierA\": null,\n    \"supplierB\": null\n  }\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
