@@ -1,5 +1,4 @@
 export type SupplierName = "Supplier A" | "Supplier B";
-
 export interface SupplierHotel {
   hotelId: string;
   name: string;
@@ -7,7 +6,6 @@ export interface SupplierHotel {
   city: string;
   commissionPct: number;
 }
-
 export interface HotelOffer {
   name: string;
   price: number;

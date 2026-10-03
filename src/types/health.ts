@@ -4,7 +4,6 @@ export interface SupplierHealthStatus {
   lastChecked: string;
   error?: string;
 }
-
 export interface HealthResponse {
   status: "healthy" | "degraded" | "unhealthy" | "starting";
   suppliers: {

@@ -1,5 +1,4 @@
 import { SupplierHotel } from "../types/hotel";
-
 export const supplierAData: SupplierHotel[] = [
   {
     hotelId: "a1",

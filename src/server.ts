@@ -2,19 +2,12 @@ import "dotenv/config";
 import app from "./app";
 import { HealthMonitorService } from "./services/health-monitor.service";
 import { disconnectRedis } from "./redis/redis.client";
-
 const PORT = parseInt(process.env.PORT || "3000", 10);
-
 const healthMonitor = new HealthMonitorService();
-
 const server = app.listen(PORT, () => {
   console.log(`[Server] Running on http://localhost:${PORT}`);
-
-  // Start background health monitoring
   healthMonitor.start();
 });
-
-// Graceful shutdown
 const shutdown = async () => {
   console.log("[Server] Shutting down...");
   healthMonitor.stop();
@@ -24,6 +17,5 @@ const shutdown = async () => {
     process.exit(0);
   });
 };
-
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);

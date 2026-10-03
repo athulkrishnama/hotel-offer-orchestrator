@@ -42,6 +42,7 @@ graph TD
 *   **Express**: Web framework for API and mock suppliers
 *   **Temporal**: Workflow orchestration for reliable execution
 *   **Redis**: Caching final offers and health status, and price filtering
+*   **PostgreSQL**: Database for Temporal
 *   **Docker**: Containerization
 *   **Jest**: Unit testing
 
@@ -82,6 +83,7 @@ docker compose up --build
 ```
 
 This will start:
+*   `postgres`: PostgreSQL database for Temporal on port `5432`
 *   `redis`: Redis server on port `6379`
 *   `temporal`: Temporal server on port `7233`
 *   `temporal-ui`: Temporal Web UI on `http://localhost:8080`
