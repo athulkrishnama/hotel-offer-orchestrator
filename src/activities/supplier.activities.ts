@@ -24,7 +24,7 @@ export async function getSupplierAHotels(
     throw new Error(`Supplier A returned HTTP ${response.status}`);
   }
 
-  const hotels: SupplierHotel[] = await response.json();
+  const hotels = (await response.json()) as SupplierHotel[];
   console.log(
     `[Supplier A Activity] Received ${hotels.length} hotels in ${elapsed}ms`
   );
@@ -52,7 +52,7 @@ export async function getSupplierBHotels(
     throw new Error(`Supplier B returned HTTP ${response.status}`);
   }
 
-  const hotels: SupplierHotel[] = await response.json();
+  const hotels = (await response.json()) as SupplierHotel[];
   console.log(
     `[Supplier B Activity] Received ${hotels.length} hotels in ${elapsed}ms`
   );

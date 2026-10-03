@@ -1,6 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { Connection, Client } from "@temporalio/client";
-import { v4 as uuidv4 } from "crypto";
 import { HotelWorkflowInput } from "../workflows/hotel.workflow";
 import { HotelOffer } from "../types/hotel";
 
